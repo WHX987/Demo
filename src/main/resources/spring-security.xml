@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans          
+    http://www.springframework.org/schema/beans/spring-beans.xsd          
+    http://www.springframework.org/schema/security          
+    http://www.springframework.org/schema/security/spring-security.xsd">
+    
+    <!-- 某些资源不拦截 -->
+    <security:http pattern="/login.html" security="none"/>
+    <security:http pattern="/error.html" security="none"/>
+    
+    <!-- 
+    	配置规则 
+    	auto-config="true" 			默认提供一套登录页面，使用默认的登录页面
+    	use-expressions="true"		使用SpringEL表达式
+    -->
+    <security:http auto-config="true" use-expressions="true">
+    	<!-- 具体拦截的规则，要求必须先登录，而且需要有ROLE_USER或者ROLE_ADMIN的角色 -->
+    	<security:intercept-url pattern="/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')" />
+    	
+    	<!-- 使用自己的登录页面 -->
+    	<security:form-login
+    		login-page="/login.html"
+    		login-processing-url="/login"
+    		default-target-url="/index.html"
+    		authentication-failure-url="/error.html"
+    	/>
+    	
+    	<!-- 关闭跨域攻击 -->
+    	<security:csrf disabled="true"/>
+    	
+    </security:http>
+    
+    <!-- 模拟假的用户数据 -->
+    <security:authentication-manager>
+    	<security:authentication-provider>
+    		<security:user-service>
+    			<security:user name="admin" password="{noop}admin" authorities="ROLE_ADMIN"/>
+    		</security:user-service>
+    	</security:authentication-provider>
+    </security:authentication-manager>
+    
+</beans>
